@@ -1,0 +1,9 @@
+avl_tree-test
+avl_tree-test.o
+build/
+*.exe
+*.user
+*.iobj
+*.ipdb
+*.pdb
+.vs/

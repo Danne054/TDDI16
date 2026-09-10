@@ -28,9 +28,10 @@ public:
     ~AVL_Tree();
     AVL_Tree &operator=(const AVL_Tree &rhs);
     AVL_Tree &operator=(AVL_Tree &&rhs);
-
+    
     void insert(const Comparable &element);
     void remove(const Comparable &element);
+    void balence(const Comparable &element);
     bool member(const Comparable &element) const;
 
     Comparable &find(const Comparable &element) const;

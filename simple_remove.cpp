@@ -9,6 +9,7 @@ void remove(const Comparable &x, Node_Pointer &t) {
         return;  // Här kan ett undantag genereras i stället ...
     }
 
+    //gå ner i trädet
     if (x < t->element) {
         remove(x, t->left);
     } else if (t->element < x) {
@@ -33,5 +34,23 @@ void remove(const Comparable &x, Node_Pointer &t) {
 
             delete tmp;
         }
+    }
+}
+
+
+
+void remove(const Comparable &x, Node_Pointer &t) {
+    if (t == nullptr) {
+        return;  // Här kan ett undantag genereras i stället ...
+    }
+
+    //gå ner i trädet
+    if (x < t->element) {
+        remove(x, t->left);
+    } else if (t->element < x) {
+        remove(x, t->right);
+    } else {
+        if (t->left == nullptr) return t->right;
+        else if (t->right == nullptr) return 
     }
 }

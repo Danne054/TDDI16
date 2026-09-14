@@ -37,7 +37,7 @@ private:
     // The following functions are called from corresponding functions in AVL_Tree
     static void insert(const Comparable&, Node_Pointer&);
     static void remove(const Comparable&, Node_Pointer&);
-    static void balence(Node_Pointer&);
+    static void balance(Node_Pointer&);
     static void clear(Node_Pointer&);
 
     static Node_Pointer find(const Comparable&, const Node_Pointer);
@@ -370,7 +370,7 @@ void AVL_Tree<Comparable>::insert(const Comparable &x) {
 template <typename Comparable>
 void AVL_Tree<Comparable>::remove(const Comparable &x) {
     Node::remove(x, root);
-    Node::balence(root);
+    // Node::balance(root);
 }
 
 /**
@@ -386,8 +386,10 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
     //gå ner i trädet
     if (x < t->element) {
         remove(x, t->left);
+        Node::balance(t);
     } else if (t->element < x) {
         remove(x, t->right);
+        Node::balance(t);
     } else {
         // Sökt värde finns i noden t
         Node_Pointer tmp;
@@ -397,6 +399,8 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
             tmp = find_min(t->right);
             t->element = tmp->element;
             remove(t->element, t->right);
+
+            Node::balance(tmp);
         } else {
             // Noden har inget eller ett barn
             tmp = t;
@@ -405,14 +409,13 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
                 t = t->right;
             else
                 t = t->left;
-
             delete tmp;
         }
     }
 }
 
 template <typename Comparable>
-void AVL_Tree_Node<Comparable>::balence(Node_Pointer &t){
+void AVL_Tree_Node<Comparable>::balance(Node_Pointer &t){
     if (node_height(t->left) - node_height(t->right) == 2)
         if (t->left->left->element < t->left->right->element)
             single_rotate_with_left_child(t);

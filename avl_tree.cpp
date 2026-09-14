@@ -409,6 +409,7 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
                 t = t->right;
             else
                 t = t->left;
+                
             delete tmp;
         }
     }

@@ -6,5 +6,5 @@ build/
 *.iobj
 *.ipdb
 *.pdb
-.vs/
 *.out
+.vs/

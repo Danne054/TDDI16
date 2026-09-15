@@ -370,7 +370,6 @@ void AVL_Tree<Comparable>::insert(const Comparable &x) {
 template <typename Comparable>
 void AVL_Tree<Comparable>::remove(const Comparable &x) {
     Node::remove(x, root);   
-    // Node::balance(root);
 }
 
 /**
@@ -387,10 +386,8 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
     //gå ner i trädet
     if (x < t->element) {
         remove(x, t->left);
-        // Node::balance(t);
     } else if (t->element < x) {
         remove(x, t->right);
-        // Node::balance(t);
     } else {
         // Sökt värde finns i noden t
         Node_Pointer tmp;
@@ -412,7 +409,7 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
                 t = t->left;
                 
             delete tmp;
-            return; //retunerar eftersom den tar bort pekare till ett löv
+            return; //retunerar eftersom den tar bort pekare till ett löv och ska derför ej kolla balans
         }
     }
     std::cout << t->element << " going back!"<< endl;

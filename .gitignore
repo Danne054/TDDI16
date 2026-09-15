@@ -7,3 +7,4 @@ build/
 *.ipdb
 *.pdb
 .vs/
+*.out

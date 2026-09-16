@@ -418,26 +418,27 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
 
 template <typename Comparable>
 void AVL_Tree_Node<Comparable>::balance(Node_Pointer &t){
+    std::cout << node_height(t->right) - node_height(t->left) << std::endl;
     if (node_height(t->left) - node_height(t->right) == 2)
 
         if ( (t->left->left != nullptr && t->left->right != nullptr) && 
             (t->left->left->element < t->left->right->element) ){
-            // std::cout << "utför roation enkel vänster rotation!" << std::endl;
-            double_rotate_with_left_child(t);
+            std::cout << "utför roation enkel vänster rotation!" << std::endl;
+            single_rotate_with_left_child(t);
         }
         else{
-            // std::cout << "utför roation dubble vänster rotation!" << std::endl;
-            single_rotate_with_left_child(t);
+            std::cout << "utför roation dubble vänster rotation!" << std::endl;
+            double_rotate_with_left_child(t);
         }
     else if (node_height(t->right) - node_height(t->left) == 2){
         std::cout << "crash" << std::endl;
         if ( (t->right->left != nullptr && t->right->right != nullptr) && 
             (t->right->left->element < t->right->right->element) ){
-            // std::cout << "utför enkel rotation!" << std::endl;
+            std::cout << "utför dubble right rotation!" << std::endl;
             double_rotate_with_right_child(t);
         }
         else{
-            // std::cout << "utför dubble rotation!" << std::endl;
+            std::cout << "utför single right rotation!" << std::endl;
             single_rotate_with_right_child(t);
         }
     }

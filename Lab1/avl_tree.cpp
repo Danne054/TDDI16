@@ -404,25 +404,32 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
             delete tmp;
             return; 
         }
-        Node::balance(t);
+        
     }
+    Node::balance(t);
 }
 
 template <typename Comparable>
 void AVL_Tree_Node<Comparable>::balance(Node_Pointer &t){
-    std::cout << node_height(t->right) - node_height(t->left) << std::endl;
+    std::cout << "at value: " << t->element << std::endl;
     if (node_height(t->left) - node_height(t->right) == 2)
-        if ( (t->left->left != nullptr && t->left->right != nullptr) && 
-            (t->left->left->element < t->left->right->element) )
+        if ( t->left->left != nullptr && t->left->right == nullptr){
             single_rotate_with_left_child(t);
+        }
+        // else if ( (t->left->left != nullptr && t->left->right != nullptr) && 
+        //     (t->left->left->element < t->left->right->element) )
+        //     single_rotate_with_left_child(t);
         else
             double_rotate_with_left_child(t);
     else if (node_height(t->right) - node_height(t->left) == 2){
-        if ( (t->right->left != nullptr && t->right->right != nullptr) && 
-            (t->right->left->element < t->right->right->element) )
-            double_rotate_with_right_child(t);
-        else
+        if ( t->right->left == nullptr && t->right->right != nullptr){
             single_rotate_with_right_child(t);
+        }
+        // if ( (t->right->left != nullptr && t->right->right != nullptr) && 
+        //     (t->right->left->element < t->right->right->element) )
+        //     single_rotate_with_right_child(t);
+        else
+            double_rotate_with_right_child(t);
     }
     else
         calculate_height(t);

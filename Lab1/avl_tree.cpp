@@ -411,7 +411,7 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
 
 template <typename Comparable>
 void AVL_Tree_Node<Comparable>::balance(Node_Pointer &t){
-    std::cout << "at value: " << t->element << std::endl;
+    // std::cout << "at value: " << t->element << std::endl;
     if (node_height(t->left) - node_height(t->right) == 2)
         if ( t->left->left != nullptr && t->left->right == nullptr){
             single_rotate_with_left_child(t);

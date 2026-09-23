@@ -37,7 +37,6 @@ private:
     // The following functions are called from corresponding functions in AVL_Tree
     static void insert(const Comparable&, Node_Pointer&);
     static void remove(const Comparable&, Node_Pointer&);
-    static void balance(Node_Pointer&);
     static void clear(Node_Pointer&);
 
     static Node_Pointer find(const Comparable&, const Node_Pointer);
@@ -58,6 +57,8 @@ private:
 
     static void calculate_height(const Node_Pointer);
     static int  node_height(const Node_Pointer);
+    
+    static void balance(Node_Pointer&);
 
     static void indent(std::ostream &os, int level);
 };
@@ -402,7 +403,6 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
                 t = t->left;
                 
             delete tmp;
-            return; 
         }
         
     }
@@ -411,26 +411,18 @@ void AVL_Tree_Node<Comparable>::remove(const Comparable &x, Node_Pointer &t) {
 
 template <typename Comparable>
 void AVL_Tree_Node<Comparable>::balance(Node_Pointer &t){
-    // std::cout << "at value: " << t->element << std::endl;
+    if (t == nullptr) return;
+
     if (node_height(t->left) - node_height(t->right) == 2)
-        if ( t->left->left != nullptr && t->left->right == nullptr){
+        if (node_height(t->left->left) >= node_height(t->left->right))
             single_rotate_with_left_child(t);
-        }
-        // else if ( (t->left->left != nullptr && t->left->right != nullptr) && 
-        //     (t->left->left->element < t->left->right->element) )
-        //     single_rotate_with_left_child(t);
         else
             double_rotate_with_left_child(t);
-    else if (node_height(t->right) - node_height(t->left) == 2){
-        if ( t->right->left == nullptr && t->right->right != nullptr){
+    else if (node_height(t->right) - node_height(t->left) == 2)
+        if (node_height (t->right->right) >= node_height(t->right->left))
             single_rotate_with_right_child(t);
-        }
-        // if ( (t->right->left != nullptr && t->right->right != nullptr) && 
-        //     (t->right->left->element < t->right->right->element) )
-        //     single_rotate_with_right_child(t);
         else
             double_rotate_with_right_child(t);
-    }
     else
         calculate_height(t);
 }

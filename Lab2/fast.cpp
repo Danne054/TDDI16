@@ -34,12 +34,33 @@ using std::unordered_map;
  */
 class Image_Summary {
 public:
+
+    bool operator==(Image_Summary const & rhs){
+        if (rhs.horizontal.size() != horizontal.size()) return false;
+        for (size_t i{}; i < horizontal.size(); ++i)
+            if (rhs.horizontal.at(i) != horizontal.at(i)) return false;
+        return true;
+    }
+
+    // Definiera en typ som specialiserar std::hash för vår typ:
+    template <typename T>
+    class std::hash<Image_Summary> {
+    public:
+        // Typen ska kunna användas som ett funktionsobjekt.
+        // Vi behöver därför överlagra funktionsanropsoperatorn (operator ()).
+        size_t operator ()(const Image_Summary &to_hash) const {
+            // Beräkna hash här...
+            return to_hash.horizontal[0];
+        }
+    };
+
     // Horizontal increases in brightness.
     vector<bool> horizontal;
-
     // Vertical increases in brightness.
     vector<bool> vertical;
 };
+
+
 
 // Compute an Image_Summary from an image. This is described in detail in the
 // lab instructions.

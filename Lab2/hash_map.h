@@ -100,6 +100,7 @@ public:
         if (pos < capacity) {
             return values[pos];
         } else {
+            std::cout << "const version, tried to find: "<< pos << std::endl;
             throw std::out_of_range("key not found");
         }
     }
@@ -218,26 +219,25 @@ private:
         // Grow the table if needed. Ensures that there are at least 2 free
         // elements, making sure that at least one element is empty after we
         // insert an element.
-        grow_if_needed();
-        
-        int real_key { hash_key(key) };
 
-        while (used[real_key] == true){
-            if (keys[real_key] == key)
-                return capacity;
-            ++real_key;
+        size_t index { hash_key(key) };
+
+        while (used[index%capacity]){
+            if (keys[index] == key)
+                return capacity; 
+            ++index;
         }
-        real_key = hash_key(real_key);
-
-        used[real_key]   = true;
-        keys[real_key]   = key;
-        values[real_key] = value;
+        index = hash_key(index);
         ++element_count;
+        grow_if_needed();
+        used[index]   = true;
+        keys[index]   = key;
+        values[index] = value;
         // TODO: Finish the implementation. Return either the index where the
         // element was inserted, or 'capacity' if the value already existed.
         // Remember to update 'element_count'!
 
-        return real_key; // Always return failure for now.
+        return index; // Always return failure for now.
     }
 
     // Find which the position where a key is located in the hash table. If the
@@ -246,13 +246,15 @@ private:
     size_t find_key(const Key &key) const {
         // TODO: Finish the implementation. Return either the index where the
         // element was found, or 'capacity' if the value already existed.
-        int real_key { hash_key(key) };
+        size_t index { hash_key(key) };
         
-        while (used[real_key]){
-            if (keys[real_key] == key)
-                return real_key;
-            ++real_key;
+        while (used[index]){
+            if (keys[index] == key)
+                return index;
+            ++index;
+            index = hash_key(index);
         }
+        
         return capacity; // Always return failure for now.
     }
 
@@ -262,24 +264,19 @@ private:
         // TODO: Finish the implementation. Return 'true' if the element was
         // found and removed. Otherwise, return 'false'. Remember to update
         // 'element_count'!
-        int key_index {find_key(key)};
-        if (key_index == capacity)
+        size_t index {find_key(key)};
+        if (index == capacity)
             return false;
 
-        used[key_index] = false;
+        used[index] = false;
         --element_count;
-        ++key_index;
-        // int key_index_hased {key_index};
-        int real_key { hash_key(key) };
-        real_key;
+        ++index;
         
-        while ( used[key_index] ){
-            if (hash_key(keys[key_index%capacity]) ==  real_key)
-                used[key_index%capacity] = false;
-                insert_key(keys[key_index%capacity], values[key_index%capacity]);
-                // key_index_hased = key_index;
-                // ++key_index_hased;
-            ++key_index;
+        while ( used[index%capacity] ){
+            used[index%capacity] = false;
+            --element_count;
+            insert_key(keys[index%capacity], values[index%capacity]);
+            ++index;
         }
         
         return true;

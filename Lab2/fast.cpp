@@ -1,11 +1,13 @@
 #include "image.h"
 #include "window.h"
 #include "load.h"
+#include "hash_map.h"
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <utility>
 
 using std::cout;
 using std::cerr;
@@ -14,6 +16,7 @@ using std::string;
 using std::vector;
 using std::unordered_map;
 
+const size_t image_size = 32;
 /**
  * Class that stores a summary of an image.
  *
@@ -52,7 +55,7 @@ public:
     vector<bool> vertical;
 };
 // Definiera en typ som specialiserar std::hash för vår typ:
-/tror inte vi behöver något i template
+//tror inte vi behöver något i template
 template <>
 class std::hash<Image_Summary> {
 public:
@@ -73,7 +76,6 @@ public:
         for (bool b : to_hash.vertical)
         //måste ha 32 för att inte råka göra två 
             h = ((h << 1) | (h >> 63)) ^ (static_cast<size_t>(b) << 32);
-
         return h;
     }
 };
@@ -86,8 +88,28 @@ Image_Summary compute_summary(const Image &image) {
 
     // TODO: Finish the implementation.
     // The lines below are here to avoid warnings. They can be removed.
-    (void)image;
-    (void)summary_size;
+    image.shrink(summary_size + 1, summary_size + 1);
+
+    // for (const auto &pixel : image)
+    //     pixel.brightness()
+
+    //vertical
+    for (size_t x{}; x < image.width(); x++){
+        for (size_t y{}; y < image.width()-1; y++){
+            Pixel pixel1 {image.pixel(x, y)};
+            Pixel pixel2 {image.pixel(x, y+1)};
+            result.vertical.push_back(pixel1.brightness() > pixel2.brightness());
+        }
+    }
+
+    //horizontal
+    for (size_t y{}; y < image.width(); y++){
+        for (size_t x{}; x < image.width(); x++){
+            Pixel pixel1 {image.pixel(x, y)};
+            Pixel pixel2 {image.pixel(x+1, y)};
+            result.horizontal.push_back(pixel1.brightness() > pixel2.brightness());
+        }
+    }
 
     return result;
 }
@@ -113,11 +135,21 @@ int main(int argc, const char *argv[]) {
 
     /**
      * TODO:
-     * - For each file:
+     * - For each file: 
      *   - Load the file
      *   - Compute its summary
      */
+    std::vector<Image_Summary> image_summary_vector{};
+    window->show_single("Loading images...", load_image(files[0]), false);
 
+    for (const auto &file : files)
+        image_summary_vector.push_back(compute_summary(load_image(file)));
+    
+    Hash_Map< Image_Summary, std::vector<std::string> > hash_map{};
+    for (size_t i{}; i < files.size(); ++i){
+        hash_map.insert( std::make_pair(image_summary_vector[i], std::vector{files[i]} ));
+    }
+    // (void)has_map;
 
     auto end = std::chrono::high_resolution_clock::now();
     cout << "Total time: "

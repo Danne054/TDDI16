@@ -35,32 +35,48 @@ using std::unordered_map;
 class Image_Summary {
 public:
 
-    bool operator==(Image_Summary const & rhs){
-        if (rhs.horizontal.size() != horizontal.size()) return false;
-        for (size_t i{}; i < horizontal.size(); ++i)
-            if (rhs.horizontal.at(i) != horizontal.at(i)) return false;
-        return true;
+   // bool operator==(Image_Summary const & rhs){
+     //   if (rhs.horizontal.size() != horizontal.size()) return false;
+       // for (size_t i{}; i < horizontal.size(); ++i)
+         //   if (rhs.horizontal.at(i) != horizontal.at(i)) return false;
+        //return true;
+    //}
+    bool operator==(const Image_Summary &rhs) const {
+        // insåg att std::vector har redan operator== som jämför storlek och innehåll.
+        return horizontal == rhs.horizontal && vertical == rhs.vertical;
     }
-
-    // Definiera en typ som specialiserar std::hash för vår typ:
-    template <typename T>
-    class std::hash<Image_Summary> {
-    public:
-        // Typen ska kunna användas som ett funktionsobjekt.
-        // Vi behöver därför överlagra funktionsanropsoperatorn (operator ()).
-        size_t operator ()(const Image_Summary &to_hash) const {
-            // Beräkna hash här...
-            return to_hash.horizontal[0];
-        }
-    };
 
     // Horizontal increases in brightness.
     vector<bool> horizontal;
     // Vertical increases in brightness.
     vector<bool> vertical;
 };
+// Definiera en typ som specialiserar std::hash för vår typ:
+/tror inte vi behöver något i template
+template <>
+class std::hash<Image_Summary> {
+public:
+// här ska vi bygga ett 64-bit tal av tru/fal
+    size_t operator ()(const Image_Summary &to_hash) const {
+        //iden blir 4*h[2] + 2*h[1] + h[0]
+        size_t h = 0;
+        // Lägg in varje bool som en bit. Eftersom vi har 72 + 72 bitar
+        // (8 rader * 9 kolumner * 2) men bara 64 bitar i size_t,
+        // roterar vi i stället för att bara skifta, så att ingen
+        // information försvinner helt.
+        //osäker dock om det är så vi ska göra
+        for (bool b : to_hash.horizontal)
+        //shifar alla bitar med ett och plockar den översta biten
+        //sedan XOR för att läggaa till nya biten
+            h = ((h << 1) | (h >> 63)) ^ static_cast<size_t>(b);
 
+        for (bool b : to_hash.vertical)
+        //måste ha 32 för att inte råka göra två 
+            h = ((h << 1) | (h >> 63)) ^ (static_cast<size_t>(b) << 32);
 
+        return h;
+    }
+};
 
 // Compute an Image_Summary from an image. This is described in detail in the
 // lab instructions.

@@ -227,7 +227,7 @@ private:
                 return capacity; 
             ++index;
         }
-        index = hash_key(index);
+        index = index%capacity;
         ++element_count;
         grow_if_needed();
         used[index]   = true;
@@ -252,7 +252,7 @@ private:
             if (keys[index] == key)
                 return index;
             ++index;
-            index = hash_key(index);
+            index = index%capacity;
         }
         
         return capacity; // Always return failure for now.

@@ -88,26 +88,25 @@ Image_Summary compute_summary(const Image &image) {
 
     // TODO: Finish the implementation.
     // The lines below are here to avoid warnings. They can be removed.
-    image.shrink(summary_size + 1, summary_size + 1);
-
+    Image shrunken_image {image.shrink(summary_size + 1, summary_size + 1)};
     // for (const auto &pixel : image)
     //     pixel.brightness()
 
     //vertical
-    for (size_t x{}; x < image.width(); x++){
-        for (size_t y{}; y < image.width()-1; y++){
-            Pixel pixel1 {image.pixel(x, y)};
-            Pixel pixel2 {image.pixel(x, y+1)};
-            result.vertical.push_back(pixel1.brightness() > pixel2.brightness());
+    for (size_t x{}; x < summary_size + 1; x++){
+        for (size_t y{}; y < summary_size; y++){
+            Pixel pixel1 {shrunken_image.pixel(x, y)};
+            Pixel pixel2 {shrunken_image.pixel(x, y+1)};
+            result.vertical.push_back(pixel1.brightness() >= pixel2.brightness());
         }
     }
 
     //horizontal
-    for (size_t y{}; y < image.width(); y++){
-        for (size_t x{}; x < image.width(); x++){
-            Pixel pixel1 {image.pixel(x, y)};
-            Pixel pixel2 {image.pixel(x+1, y)};
-            result.horizontal.push_back(pixel1.brightness() > pixel2.brightness());
+    for (size_t y{}; y < summary_size + 1; y++){
+        for (size_t x{}; x < summary_size; x++){
+            Pixel pixel1 {shrunken_image.pixel(x, y)};
+            Pixel pixel2 {shrunken_image.pixel(x+1, y)};
+            result.horizontal.push_back(pixel1.brightness() >= pixel2.brightness());
         }
     }
 
@@ -145,10 +144,24 @@ int main(int argc, const char *argv[]) {
     for (const auto &file : files)
         image_summary_vector.push_back(compute_summary(load_image(file)));
     
-    Hash_Map< Image_Summary, std::vector<std::string> > hash_map{};
+    Hash_Map< Image_Summary, std::vector<std::string> > map{};
     for (size_t i{}; i < files.size(); ++i){
-        hash_map.insert( std::make_pair(image_summary_vector[i], std::vector{files[i]} ));
+
+        std::hash<Image_Summary>{}(image_summary_vector[i]);
+        auto elem = map.find( image_summary_vector[i] );
+
+        if (elem != map.end()){
+            
+            std::vector tmp {(*elem).second};
+            tmp.push_back(files[i]);
+            map.erase( image_summary_vector[i]);
+            map.insert( std::make_pair(image_summary_vector[i], tmp ));
+        } else {
+        map.insert( std::make_pair(image_summary_vector[i], std::vector{files[i]} ));
+        }
     }
+
+
     // (void)has_map;
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -156,6 +169,24 @@ int main(int argc, const char *argv[]) {
          << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
          << " milliseconds." << endl;
 
+    for (auto &key : image_summary_vector){
+
+        auto element = map.find(key);
+        
+        if (element != map.end() && (*element).second.size() > 1){
+            // std::cout << "show duplicets" << std::endl;
+            window->report_match((*element).second);
+        }
+    }
+
+        // auto elem = map.find(i);
+       
+        
+
+        // if (matches.size() > 1)
+        //     window->report_match(matches);
+
+    
     /**
      * TODO:
      * - Display sets of files with equal summaries

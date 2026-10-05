@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <utility>
+#include <set>
 
 using std::cout;
 using std::cerr;
@@ -139,6 +140,7 @@ int main(int argc, const char *argv[]) {
      *   - Compute its summary
      */
     std::vector<Image_Summary> image_summary_vector{};
+    std::vector<Image_Summary> image_summary_unique_key{};
     window->show_single("Loading images...", load_image(files[0]), false);
 
     for (const auto &file : files)
@@ -154,10 +156,12 @@ int main(int argc, const char *argv[]) {
             
             std::vector tmp {(*elem).second};
             tmp.push_back(files[i]);
+
             map.erase( image_summary_vector[i]);
             map.insert( std::make_pair(image_summary_vector[i], tmp ));
         } else {
-        map.insert( std::make_pair(image_summary_vector[i], std::vector{files[i]} ));
+            image_summary_unique_key.push_back(image_summary_vector[i]);
+            map.insert( std::make_pair(image_summary_vector[i], std::vector{files[i]} ));
         }
     }
 
@@ -169,7 +173,7 @@ int main(int argc, const char *argv[]) {
          << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
          << " milliseconds." << endl;
 
-    for (auto &key : image_summary_vector){
+    for (auto &key : image_summary_unique_key){
 
         auto element = map.find(key);
         

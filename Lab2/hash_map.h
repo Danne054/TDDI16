@@ -219,7 +219,7 @@ private:
         // Grow the table if needed. Ensures that there are at least 2 free
         // elements, making sure that at least one element is empty after we
         // insert an element.
-
+        grow_if_needed();
         size_t index { hash_key(key) };
 
         while (used[index%capacity]){
@@ -229,7 +229,7 @@ private:
         }
         index = index%capacity;
         ++element_count;
-        grow_if_needed();
+        
         used[index]   = true;
         keys[index]   = key;
         values[index] = value;

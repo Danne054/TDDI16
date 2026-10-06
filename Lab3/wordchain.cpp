@@ -158,17 +158,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
 
 vector<string> find_shortest(const Dictionary &dict, const string &from, const string &to) {
     vector<string> result;
-    //cout << "TODO: Implement me!" << endl;
-    // vector <vector <string>> neighbors {};
-    // neighbors.push_back(get_neighbors(dict, from));
-    // result = get_neighbors(dict, from);
-    // for (const vector <string> & v_s: neighbors){
     result = bfs(dict,from,  to);
-    // }
-    // int a = dict.find(from);
-    // int b = dict.find(to);
-    // if (a < 0 || b < 0)
-    //     return vector<string>();
     return result;
 }
 

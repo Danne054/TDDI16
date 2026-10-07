@@ -2,18 +2,15 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <algorithm>
 
-using std::vector;
-using std::string;
-using std::cout;
-using std::endl;
-using std::queue;
-#include <algorithm>
-using namespace std;
 
-#include <iostream>
-#include <vector>
+// using std::vector;
+// using std::string;
+// using std::cout;
+// using std::endl;
+// using std::queue;
+
+
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
@@ -31,6 +28,7 @@ struct Node {
 };
 vector <Node > graph;
 
+//ta bort dict här sedan
 static vector<string> follow_parents(unordered_map<string, Node> const& graph, const Dictionary &dict, string const& end_node, const string &from, bool const reverse ) {
     vector<string> chain{ };
     
@@ -145,16 +143,6 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
         q.pop();
         
         vector<string> neighbors {get_neighbors(dict, curr)};
-        if (neighbors.empty()) {
-            vector<string> tmp{
-                follow_parents(graph, dict, curr, from, true)
-            };
-            
-            tmp.push_back(from);
-            all_paths.push_back(tmp);
-
-            continue;
-        }
 
         for (size_t i{}; i < neighbors.size(); ++i) {
             auto it = graph.find(neighbors.at(i));

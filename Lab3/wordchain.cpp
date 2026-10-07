@@ -24,23 +24,44 @@ using namespace std;
 
 typedef vector<string> Dictionary;
 
+// struct Node {
+//     // vector <string > edges;
+//     bool visited = false;
+//     string previous;
+// };
+// vector <Node > graph;
+
 struct Node {
     // vector <string > edges;
     bool visited = false;
-    string previous;
+    int previous ;
 };
-vector <Node > graph;
+// vector <Node > graph;
 
-static vector<string> follow_parents(vector<Node> const& node_vector, const Dictionary &dict, Node const& end_node, const string &from, bool const reverse = false) {
+// static vector<string> follow_parents(vector<Node> const& node_vector, const Dictionary &dict, Node const& end_node, const string &from, bool const reverse = false) {
+//     Node current_node{end_node};
+//     vector<string> chain{};
+
+//     while (current_node.previous != from){
+//         if (!reverse)
+//             chain.insert(chain.begin(), current_node.previous);
+//         else 
+//             chain.push_back(current_node.previous);
+//         current_node = node_vector.at(distance(dict.begin(), find(dict.begin(), dict.end(), current_node.previous)));
+//     }
+//     return chain;
+// }
+
+static vector<string> follow_parents(vector<Node> const& node_vector, const Dictionary &dict, Node const& end_node, const int from_idx, bool const reverse = false) {
     Node current_node{end_node};
     vector<string> chain{};
 
-    while (current_node.previous != from){
+    while (current_node.previous != from_idx){
         if (!reverse)
-            chain.insert(chain.begin(), current_node.previous);
+            chain.insert(chain.begin(), dict.at(current_node.previous));
         else 
-            chain.push_back(current_node.previous);
-        current_node = node_vector.at(distance(dict.begin(), find(dict.begin(), dict.end(), current_node.previous)));
+            chain.push_back(dict.at(current_node.previous));
+        current_node = node_vector.at(current_node.previous);
     }
     return chain;
 }
@@ -54,91 +75,88 @@ int word_diff(string const& word1, string const& word2) {
     return diff;
 }
 
-vector<string> get_neighbors(const Dictionary &dict, const string &from){
-    vector<string> neighbors{};
-    for (size_t i{}; i < dict.size(); ++i){
-        if (word_diff (dict[i], from) == 1) neighbors.push_back(dict[i]);
-    }
-    //testade med unordered_set men det var långsammare, vet ej varför 
-    // for (string word : dict) 
-    //     if (word_diff (word, from) == 1) neighbors.push_back(word);
+vector<int> get_neighbors(const Dictionary &dict, const string &from, const vector<Node> & node_vector){
+    vector<int> neighbors{};
     
+    for (size_t i{}; i < dict.size(); ++i){
+        if (node_vector.at(i).visited == false and (1 == word_diff(dict[i], from))){
+            neighbors.push_back(i);
+        }  
+    }
     return neighbors;
 }
 
 vector<string> bfs(const Dictionary &dict, string const& from, string const& to) {
-    // vector <vector<string>> adj{};
-    vector<Node> node_vector(dict.size(), Node{false, string{}});
+    vector<Node> node_vector(dict.size(), Node{false, int{}});
     vector<string> chain { };
-    queue<string> q;
+    queue<int> q;
+    auto from_idx = distance(dict.begin(),find(dict.begin(), dict.end(), from));
 
-    q.push(from);
+    q.push(from_idx);
     while (!q.empty()) {
-        string curr = q.front();
+        int curr = q.front();
         q.pop();
   
-        vector<string> neighbors {get_neighbors(dict, curr)};
-        if (neighbors.empty()) return chain;
+        vector<int> neighbors {get_neighbors(dict, dict[curr], node_vector)};
+        // if (neighbors.empty()) return chain;
         //titar på grannoderna
-        for (size_t i{}; i < neighbors.size(); ++i) {
-            
-            auto it = distance(dict.begin(), find(dict.begin(), dict.end(), neighbors.at(i)));
-
-            if (!node_vector.at(it).visited) {
-
-                node_vector.at(it).previous = curr;
-                node_vector.at(it).visited = true;
-                q.push(neighbors.at(i));
-                if (neighbors.at(i) == to) {
-                    chain = follow_parents(node_vector, dict, node_vector.at(it) , from);
-                    chain.push_back(neighbors.at(i));
-                    return chain;
+        if (!neighbors.empty()){
+            for (const int neighbor: neighbors) {
+                if (!node_vector.at(neighbor).visited) {
+                    node_vector.at(neighbor).previous = curr;
+                    node_vector.at(neighbor).visited = true;
+                    q.push(neighbor);
+                    if (dict[neighbor] == to) {
+                        chain = follow_parents(node_vector, dict, node_vector.at(neighbor) , from_idx);
+                        chain.push_back(dict[neighbor]);
+                        return chain;
+                    }
                 }
-            }
-        }    
+            } 
+        }   
     }
     return chain;
 }
 
 
 vector<string> bfs_longest(const Dictionary &dict, string const& from) {
-    // vector <vector<string>> adj{};
-    vector<Node> node_vector(dict.size(), Node{false, string{}});
+    vector<Node> node_vector(dict.size(), Node{false, int{}}); // graph
     vector<string> chain{ };
     vector<vector<string>> all_paths{ };
-    queue<string> q;
-
-    q.push(from);
+    queue<int> q;
     bool foud_end { };
+    auto from_idx = distance(dict.begin(),find(dict.begin(), dict.end(), from));
+    
+    q.push(from_idx);
     while (!q.empty()) {
-        // std::cout << "in dict" << std::endl;
-        foud_end = true;
-        string curr = q.front();
+        int curr = q.front();
         q.pop();
-        // std::cout << "poped: "<< curr << std::endl;
-        vector<string> neighbors {get_neighbors(dict, curr)};
-        if (neighbors.empty()) return chain;
-
-        for (size_t i{}; i < neighbors.size(); ++i) {
-
-            auto it = distance(dict.begin(), find(dict.begin(), dict.end(), neighbors.at(i)));
-
-            if (!node_vector.at(it).visited) {
-                foud_end = false;
-                node_vector.at(it).previous = curr;
-                node_vector.at(it).visited = true;
-                q.push(neighbors.at(i));
-            }
-        }  
-
+        
         if (foud_end){
-            auto it = distance(dict.begin(), find(dict.begin(), dict.end(), curr));
-            vector <string> tmp { follow_parents(node_vector, dict, node_vector.at(it) , from, true) };
+            // auto it = distance(dict.begin(), find(dict.begin(), dict.end(), curr));
+            vector <string> tmp { follow_parents(node_vector, dict, node_vector.at(curr) , from_idx, true) };
             tmp.push_back(from);
             all_paths.push_back(tmp);
         }
+        // vector<string> neighbors {get_neighbors(dict, curr)};
+         
+        vector<int> neighbors {get_neighbors(dict, dict[curr], node_vector)};
+        // if (neighbors.empty()) return continue;
+        if (!neighbors.empty()){
+            for (const int neighbor: neighbors) {
+
+                // auto it = distance(dict.begin(), find(dict.begin(), dict.end(), neighbor));
+
+                if (!node_vector.at(neighbor).visited) {
+                    node_vector.at(neighbor).previous = curr;
+                    node_vector.at(neighbor).visited = true;
+                    q.push(neighbor);
+                }
+            }  
+        } else {
+            foud_end = true;
+        }
     }
-    // std::cout <<"paths" << all_paths.size() <<std::endl;
 
     for (size_t i{1}; i < all_paths.size(); ++i )
         if (all_paths.at(i) > chain)
@@ -157,7 +175,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
  */
 
 vector<string> find_shortest(const Dictionary &dict, const string &from, const string &to) {
-    vector<string> result;
+    vector<string> result{ };
     result = bfs(dict,from,  to);
     return result;
 }

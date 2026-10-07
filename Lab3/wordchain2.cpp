@@ -31,18 +31,20 @@ struct Node {
 };
 vector <Node > graph;
 
-static vector<string> follow_parents(unordered_map<string, Node> const& node_vector, const Dictionary &dict, string const& end_node, const string &from, bool const reverse = false) {
-    // std::cout << "working" << std::endl;
-    Node current_node{ node_vector.at(end_node)};
-    vector<string> chain{};
-
+static vector<string> follow_parents(unordered_map<string, Node> const& graph, const Dictionary &dict, string const& end_node, const string &from, bool const reverse ) {
+    vector<string> chain{ };
+    
+    Node current_node{ graph.at(end_node)};
+    chain.push_back(end_node);
+    // chain.push_back(from);
     while (current_node.previous != from){
         if (!reverse)
             chain.insert(chain.begin(), current_node.previous);
         else 
             chain.push_back(current_node.previous);
-        current_node = node_vector.at(current_node.previous);
+        current_node = graph.at(current_node.previous);
     }
+       
     return chain;
 }
 
@@ -61,7 +63,7 @@ vector<string> generate_word(const string &from){
     string alphabet {"abcdefghijklmnopqrstuvwxyz"};
 
     for (size_t j{}; j < from.size(); ++j){
-        for (size_t i{from.at(j) +'a'}; i  < alphabet.size() + (from.at(j) +'a'); ++i){
+        for (size_t i{static_cast<size_t>(from.at(j) +'a')}; i  < alphabet.size() + (from.at(j) +'a'); ++i){
             word.at(j) = alphabet.at(i%alphabet.size());
             all_possible_neighbors.push_back(word);
         }
@@ -91,6 +93,7 @@ vector<string> bfs(const Dictionary &dict, string const& from, string const& to)
     vector<string> chain { };
     queue<string> q;
 
+    graph.at(from).visited = true;
     q.push(from);
     while (!q.empty()) {
         string curr = q.front();
@@ -109,8 +112,9 @@ vector<string> bfs(const Dictionary &dict, string const& from, string const& to)
                 graph.at(neighbors.at(i)).visited = true;
                 q.push(neighbors.at(i));
                 if (neighbors.at(i) == to) {
-                    chain = follow_parents(graph, dict, neighbors.at(i) , from);
-                    chain.push_back(neighbors.at(i));
+                    chain = follow_parents(graph, dict, neighbors.at(i) , from, false);
+                    chain.insert(chain.begin(), from);
+
                     return chain;
                 }
             }
@@ -131,7 +135,8 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
     vector<string> chain{ };
     vector<vector<string>> all_paths{ };
     queue<string> q;
-    
+
+    graph.at(from).visited = true;
     q.push(from);
     bool foud_end { };
     while (!q.empty()) {
@@ -140,7 +145,16 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
         q.pop();
         
         vector<string> neighbors {get_neighbors(dict, curr)};
-        if (neighbors.empty()) return chain;
+        if (neighbors.empty()) {
+            vector<string> tmp{
+                follow_parents(graph, dict, curr, from, true)
+            };
+            
+            tmp.push_back(from);
+            all_paths.push_back(tmp);
+
+            continue;
+        }
 
         for (size_t i{}; i < neighbors.size(); ++i) {
             auto it = graph.find(neighbors.at(i));
@@ -154,7 +168,9 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
         }  
 
         if (foud_end){
+            if (curr == from) return vector<string>{};
             vector <string> tmp { follow_parents(graph, dict, curr , from, true) };
+            
             tmp.push_back(from);
             all_paths.push_back(tmp);
         }
@@ -162,7 +178,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
     // std::cout <<"paths" << all_paths.size() <<std::endl;
 
     for (size_t i{1}; i < all_paths.size(); ++i )
-        if (all_paths.at(i) > chain)
+        if (all_paths.at(i).size() > chain.size())
             chain = all_paths.at(i);
     
     return chain;
@@ -179,7 +195,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
 
 vector<string> find_shortest(const Dictionary &dict, const string &from, const string &to) {
     vector<string> result;
-    // result = bfs(dict,from,  to);
+    result = bfs(dict,from,  to);
     return result;
 }
 

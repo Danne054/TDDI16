@@ -159,7 +159,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
     }
 
     for (size_t i{1}; i < all_paths.size(); ++i )
-        if (all_paths.at(i) > chain)
+        if (all_paths.at(i).size() > chain.size())
             chain = all_paths.at(i);
     
     return chain;

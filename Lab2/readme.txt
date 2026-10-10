@@ -18,7 +18,8 @@ insert_key: o(1)
   1000, 2000, 3000, 4000, och så vidare tills vi har satt in 500 element.
   Kommer hashtabellen fungera bra i det här fallet? Varför/varför inte?
 
-Mycket kollitioner men det kommer fungera.
+Det kommer inte vara optimalt efterom nycklarna kommer hasha till samma bucket, det kommer i princip leda till (O(n)) i tidskomplexiteten, förutsatt att modulu används som hasfunktion (samma hashfunktion som del a av labben). 
+En annan hasfunktion kan ledea till ett bättre resultat.
 
 - När testprogrammet jämför Hash_Map med std::unordered_map (alternativ 9) så
   använder vi int som både nyckel och värde. Typen int är lite speciell i
@@ -69,7 +70,9 @@ Det påverkar hur stor känslig testet är mot bilders ljustryrka desto större 
   kod som *använder* "compute_summary"?) Tycker du att implementationen av
   "compute_summary" som är given i labbhandledningen uppfyller dessa egenskaper?
 
-nej, kunde varit tydligare 
+Det viktiga är att outputet från compute_summary är samma för alla bilder som ser likadna ut, alltså måste compute_summary alltid ge samma output för likadnat input. 
+För att alla utdata som compute_summary ger ska gå att jämföras, måste alla bilder i olika format som exempelvis olika uplösningar ge utdata is samma format efter de körts genom compute_summary.
+Sedan är det bra att ha en variabel som kan justera hur stor toleransen är för skillander i bilder vilket vi upplevde att summary_size gjorde gnaksa bra.
 
 - Ser du några problem med metoden för att se om två bilder är lika dana?
   Fundera exempelvis på vilka typer av olikheter som tolereras, och vilka

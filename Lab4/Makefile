@@ -2,7 +2,7 @@
 # Makefile för mönstermatchning
 #
 
-CXX      := g++ -std=c++20 -pipe
+CXX      := g++ -std=c++17 -pipe
 OPTIMIZE := -O3
 FLAGS    := $(OPTIMIZE) -Wall -Wextra -g
 LDFLAGS  := -pthread -lsfml-graphics -lsfml-window -lsfml-system

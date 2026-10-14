@@ -22,15 +22,15 @@ fast:
     
       N       brute       sortering
  ----------------------------------
-    150
-    200
-    300
-    400
+    150     0.011 min     0.00013 min
+    200     92 millisec
+    300     302 millisec
+    400     0.012 min
     800
    1600
    3200
-   6400
-  12800
+   6400                   0.22min
+  12800                   0.94 min
 
 
 - Energianvändning

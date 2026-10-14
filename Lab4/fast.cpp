@@ -65,15 +65,23 @@ void quickSort(vector<Point>& vec, int low, int high, Point const& origin) {
         quickSort(vec, pi + 1, high, origin);
     }
 }
+//points_on_line.find(temp_key)->second, slope_sorted.at(i)
+bool check_slope_point_vector(const vector<Point> & points, const vector<Point> & points_line, Point const& compare_point, int const o, double const tolerance){
+    for (size_t i{1}; i < points_line.size(); ++i){
+        if ( !(sameSlope(points.at(o).slopeTo(points_line.at(i)), points.at(o).slopeTo(compare_point), tolerance)) ){
+            return false;
+        } 
+        // else if (i == 3 )
+        //     return false;
+    }
 
+    return true;
+}
+    
 void find_line(int const N, vector<Point> const& points, double const tolerance,  WindowPtr const& window){
     vector<Point> used_points{}; 
     
     for (int o{0}; o < N; ++o){
-        // cout << "----new o ----" << endl;
-        // if (in_line(used_points, points.at(o))) continue;
-        // cout << "test1" << endl;
-        // PolarSorter slope_for_point{points.at(o)};
         vector<Point> slope_sorted{points};
         
         quickSort(slope_sorted, 0, slope_sorted.size()-1, points.at(o));
@@ -90,15 +98,15 @@ void find_line(int const N, vector<Point> const& points, double const tolerance,
         // count()
         // find()
         for (size_t i{1}; i < slope_sorted.size(); ++i){
-            if (sameSlope(points.at(o).slopeTo(slope_sorted.at(i-1)), points.at(o).slopeTo(slope_sorted.at(i)), tolerance)){
+            //if (sameSlope(points.at(o).slopeTo(slope_sorted.at(i-1)), points.at(o).slopeTo(slope_sorted.at(i) ), tolerance)){
+            if (check_slope_point_vector(points, points_on_line.find(temp_key)->second, slope_sorted.at(i), o, tolerance)){
                 vector <Point> tmp_points_vector{ points_on_line.find(temp_key)->second };
                 tmp_points_vector.push_back(slope_sorted.at(i));
                 points_on_line.erase(temp_key);
                 points_on_line.emplace(temp_key, tmp_points_vector);
-                // used_points.push_back(slope_sorted.at(i-1));
-                // used_points.push_back(slope_sorted.at(i));
             }
             else{
+                //kanske erase gammal om den är under 4 i storlek
                 temp_key = points.at(o).slopeTo(slope_sorted.at(i));
                 points_on_line.emplace(temp_key, vector<Point>{points.at(o), slope_sorted.at(i)});
             }

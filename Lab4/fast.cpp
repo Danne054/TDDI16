@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <vector>
 #include <chrono>
@@ -132,29 +133,30 @@ int main(int argc, const char* argv[]) {
     // Read points from cin
     int N{};
     cin >> N;
-
+    
+    // kör vårt program
     for (int i{0}; i < N; ++i) {
         double x{}, y{};
         cin >> x >> y;
         points.push_back(Point{x, y});
     }
-    // kör vårt program
-    auto begin = chrono::high_resolution_clock::now();
-    find_line(N, points, tolerance, window);
 
     // draw points to screen all at once
     window->draw_points(points);
 
-
-
+    auto begin = chrono::high_resolution_clock::now();
+    
     /////////////////////////////////////////////////////////////////////////////
     // Draw any lines that you find in 'points' using the function 'window->draw_line'.
     /////////////////////////////////////////////////////////////////////////////
+    find_line(N, points, tolerance, window);
 
     auto end = chrono::high_resolution_clock::now();
     cout << "Computing line segments took "
          << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()
-         << " milliseconds." << endl;
+         << " milliseconds.\n"
+         << setprecision(2) << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()/60000.0
+         << " min." << endl;
 
     // wait for user to terminate program
     window->run();

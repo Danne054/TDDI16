@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <vector>
 #include <chrono>
@@ -63,9 +64,11 @@ int main(int argc, const char* argv[]) {
     }
 
     auto end = chrono::high_resolution_clock::now();
-    cout << "Computing line segments took "
-         << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()
-         << " milliseconds." << endl;
+     cout << "Computing line segments took "
+          << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()
+          << " milliseconds.\n"
+          << setprecision(2) << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()/60000.0
+          << " min." << endl;
 
     // wait for user to terminate program
     window->run();

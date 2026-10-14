@@ -3,165 +3,151 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
-
-using std::vector;
-using std::string;
-using std::cout;
-using std::endl;
-using std::queue;
-#include <algorithm>
-using namespace std;
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
 #include <unordered_set>
+#include <unordered_map>
+
 using namespace std;
 // Typ som används för ordlistan. Den definieras med en typedef här så att du enkelt kan ändra
 // representationen av en ordlista utefter vad din implementation behöver. Funktionen
 // "read_questions" skickar ordlistan till "find_shortest" och "find_longest" med hjälp av denna
 // typen.
 
-typedef vector<string> Dictionary;
+typedef unordered_set<string> Dictionary;
 
-// struct Node {
-//     // vector <string > edges;
-//     bool visited = false;
-//     string previous;
-// };
-// vector <Node > graph;
-
-struct Node {
-    // vector <string > edges;
-    bool visited = false;
-    int previous ;
-};
-// vector <Node > graph;
-
-// static vector<string> follow_parents(vector<Node> const& node_vector, const Dictionary &dict, Node const& end_node, const string &from, bool const reverse = false) {
-//     Node current_node{end_node};
-//     vector<string> chain{};
-
-//     while (current_node.previous != from){
-//         if (!reverse)
-//             chain.insert(chain.begin(), current_node.previous);
-//         else 
-//             chain.push_back(current_node.previous);
-//         current_node = node_vector.at(distance(dict.begin(), find(dict.begin(), dict.end(), current_node.previous)));
-//     }
-//     return chain;
-// }
-
-static vector<string> follow_parents(vector<Node> const& node_vector, const Dictionary &dict, Node const& end_node, const int from_idx, bool const reverse = false) {
-    Node current_node{end_node};
-    vector<string> chain{};
-
-    while (current_node.previous != from_idx){
+static vector<string> follow_parents(unordered_map<string, string> const& graph, string const& end_node, const string &from, bool const reverse ) {
+    vector<string> chain{ };
+    
+    string current_node { end_node };
+    string previous_node{ graph.at(end_node) };
+    chain.push_back(end_node);
+    // chain.push_back(from);
+    while (previous_node != from){
+        
         if (!reverse)
-            chain.insert(chain.begin(), dict.at(current_node.previous));
+            chain.insert(chain.begin(), previous_node);
         else 
-            chain.push_back(dict.at(current_node.previous));
-        current_node = node_vector.at(current_node.previous);
+            chain.push_back(previous_node);
+
+        previous_node = graph.at(previous_node);
     }
+       
     return chain;
 }
 
-int word_diff(string const& word1, string const& word2) {
-    int diff {};
-    for (size_t i{}; i < word2.size(); ++i){
-        if (word2.at(i) != word1.at(i)) ++diff;
-        if (diff > 1) return diff;
-    }
-    return diff;
-}
+vector<string> generate_word(const string &from){
+    string word { from };
+    vector<string> all_possible_neighbors{ };
+    string alphabet {"abcdefghijklmnopqrstuvwxyz"};
 
-vector<int> get_neighbors(const Dictionary &dict, const string &from, const vector<Node> & node_vector){
-    vector<int> neighbors{};
-    
-    for (size_t i{}; i < dict.size(); ++i){
-        if (node_vector.at(i).visited == false and (1 == word_diff(dict[i], from))){
-            neighbors.push_back(i);
-        }  
+    for (size_t j{}; j < from.size(); ++j){
+        for (size_t i{static_cast<size_t>(from.at(j) -'a'+1)}; i  < alphabet.size() + (from.at(j) -'a'); ++i){
+            word.at(j) = alphabet.at(i%alphabet.size());
+            all_possible_neighbors.push_back(word);
+        }
+        word = from;
+    }
+
+    return all_possible_neighbors;
+}   
+
+vector<string> get_neighbors(const Dictionary &dict, const string &from, const unordered_map<string, bool> & visited){
+    vector<string> all_possible_neighbors {generate_word(from)};
+    vector<string> neighbors{};
+
+    for (const string & w : all_possible_neighbors){
+        auto it = visited.find(w);
+
+        if (it != visited.end() && !it->second && dict.count(w) >= 1){
+            neighbors.push_back(w);
+        }
     }
     return neighbors;
 }
 
-vector<string> bfs(const Dictionary &dict, string const& from, string const& to) {
-    vector<Node> node_vector(dict.size(), Node{false, int{}});
-    vector<string> chain { };
-    queue<int> q;
-    auto from_idx = distance(dict.begin(),find(dict.begin(), dict.end(), from));
+void add_keys(unordered_map<string, string> &graph, unordered_map<string, bool> & visited, const Dictionary &dict, string const& from){
+    graph.emplace(from, string{} );
+    visited.emplace(from, true);
+    for (const string& word : dict) {
+        graph.emplace(word, string{} );
+        visited.emplace(word, false);
+    }
+}
 
-    q.push(from_idx);
+vector<string> bfs(const Dictionary &dict, string const& from, string const& to) {
+    unordered_map<string, string> graph;
+    unordered_map<string, bool> visited;
+
+    add_keys(graph, visited, dict, from);
+
+    vector<string> chain { };
+    queue<string> q;
+
+    q.push(from);
     while (!q.empty()) {
-        int curr = q.front();
+        string curr = q.front();
         q.pop();
-  
-        vector<int> neighbors {get_neighbors(dict, dict[curr], node_vector)};
-        // if (neighbors.empty()) return chain;
-        //titar på grannoderna
-        if (!neighbors.empty()){
-            for (const int neighbor: neighbors) {
-                if (!node_vector.at(neighbor).visited) {
-                    node_vector.at(neighbor).previous = curr;
-                    node_vector.at(neighbor).visited = true;
-                    q.push(neighbor);
-                    if (dict[neighbor] == to) {
-                        chain = follow_parents(node_vector, dict, node_vector.at(neighbor) , from_idx);
-                        chain.push_back(dict[neighbor]);
-                        return chain;
-                    }
-                }
-            } 
-        }   
+        
+        vector<string> neighbors {get_neighbors(dict, curr, visited)};
+        
+        //titar på grannoderna, neighbors innehåller nu bara grannnorder som ej är besökta
+        for (const string & neighbor : neighbors) {
+
+            graph.at(neighbor) = curr;
+            visited.at(neighbor) = true;
+            q.push(neighbor);
+            if (neighbor == to) {
+                chain = follow_parents(graph, neighbor , from, false);
+                chain.insert(chain.begin(), from);
+                return chain;
+            }
+
+        }    
     }
     return chain;
 }
 
 
 vector<string> bfs_longest(const Dictionary &dict, string const& from) {
-    vector<Node> node_vector(dict.size(), Node{false, int{}}); // graph
-    vector<string> chain{ };
-    vector<vector<string>> all_paths{ };
-    queue<int> q;
-    bool foud_end { };
-    auto from_idx = distance(dict.begin(),find(dict.begin(), dict.end(), from));
+    unordered_map<string, string> graph;
+    unordered_map<string, bool> visited;
+
+    add_keys(graph, visited, dict, from);
     
-    q.push(from_idx);
+    vector<vector<string>> all_paths{ };
+    vector<string> chain { };
+    
+    bool found_end { };
+    queue<string> q;
+    q.push(from);
+    
     while (!q.empty()) {
-        int curr = q.front();
+        found_end = true;
+        string curr = q.front();
         q.pop();
+
+        vector<string> neighbors {get_neighbors(dict, curr, visited)};
         
-        if (foud_end){
-            // auto it = distance(dict.begin(), find(dict.begin(), dict.end(), curr));
-            vector <string> tmp { follow_parents(node_vector, dict, node_vector.at(curr) , from_idx, true) };
-            tmp.push_back(from);
-            all_paths.push_back(tmp);
-        }
-        // vector<string> neighbors {get_neighbors(dict, curr)};
-         
-        vector<int> neighbors {get_neighbors(dict, dict[curr], node_vector)};
-        // if (neighbors.empty()) return continue;
-        if (!neighbors.empty()){
-            for (const int neighbor: neighbors) {
-
-                // auto it = distance(dict.begin(), find(dict.begin(), dict.end(), neighbor));
-
-                if (!node_vector.at(neighbor).visited) {
-                    node_vector.at(neighbor).previous = curr;
-                    node_vector.at(neighbor).visited = true;
-                    q.push(neighbor);
-                }
-            }  
-        } else {
-            foud_end = true;
+        for (const string & neighbor : neighbors) {
+            found_end = false;
+            graph.at(neighbor) = curr;
+            visited.at(neighbor) = true;
+            q.push(neighbor);
+        }  
+        
+        if (found_end){
+            if (curr == from){
+                chain = vector<string>{};
+            } else {
+                chain = follow_parents(graph, curr , from, true);
+                chain.push_back(from);
+            }
+            all_paths.push_back(chain);
         }
     }
 
-    for (size_t i{1}; i < all_paths.size(); ++i )
+    for (size_t i{0}; i < all_paths.size(); ++i )
         if (all_paths.at(i).size() > chain.size())
             chain = all_paths.at(i);
-    
     return chain;
 }
 
@@ -175,7 +161,7 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
  */
 
 vector<string> find_shortest(const Dictionary &dict, const string &from, const string &to) {
-    vector<string> result{ };
+    vector<string> result;
     result = bfs(dict,from,  to);
     return result;
 }
@@ -187,6 +173,7 @@ vector<string> find_shortest(const Dictionary &dict, const string &from, const s
 vector<string> find_longest(const Dictionary &dict, const string &word) {
     vector<string> result(1, word);
     // cout << "TODO: Implement me!" << endl;
+    
     result = bfs_longest(dict, word);
     return result;
 }

@@ -80,7 +80,7 @@ bool check_slope_point_vector(const vector<Point> & points, const vector<Point> 
     
 void find_line(int const N, vector<Point> const& points, double const tolerance,  WindowPtr const& window){
     vector<Point> used_points{}; 
-    
+    if (points.empty()) return;
     for (int o{0}; o < N; ++o){
         vector<Point> slope_sorted{points};
         
@@ -90,13 +90,9 @@ void find_line(int const N, vector<Point> const& points, double const tolerance,
         double temp_key{ };
         if (!slope_sorted.empty()){
             temp_key = (points.at(o)).slopeTo(slope_sorted.at(0));
-            // cout << "test3" << endl;
             points_on_line.emplace(temp_key, vector<Point>{slope_sorted.at(o), slope_sorted.at(0)});
         }    
-        // cout << "test4" << endl;
         
-        // count()
-        // find()
         for (size_t i{1}; i < slope_sorted.size(); ++i){
             //if (sameSlope(points.at(o).slopeTo(slope_sorted.at(i-1)), points.at(o).slopeTo(slope_sorted.at(i) ), tolerance)){
             if (check_slope_point_vector(points, points_on_line.find(temp_key)->second, slope_sorted.at(i), o, tolerance)){
@@ -111,17 +107,12 @@ void find_line(int const N, vector<Point> const& points, double const tolerance,
                 points_on_line.emplace(temp_key, vector<Point>{points.at(o), slope_sorted.at(i)});
             }
         }
-        // cout << "test4" << endl;
-        
 
         for (const std::pair<double, vector<Point>> P : points_on_line)
             if(P.second.size() >= 4){
                 window->draw_line(P.second);
 
-                // cout << "--------" << endl;
             }
-        // cout << "test5" << endl;
-        // cout << "-----------------" << endl;
     }
 }
 

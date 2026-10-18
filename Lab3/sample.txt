@@ -8,5 +8,8 @@ sten
 aula jama
 aula
 sten aula
+aula sten
+stor sten
 sten stor
+sten
 stor

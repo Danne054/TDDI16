@@ -40,7 +40,7 @@ vector<string> generate_word(const string &from){
     string alphabet {"abcdefghijklmnopqrstuvwxyz"};
 
     for (size_t j{}; j < from.size(); ++j){
-        for (size_t i{static_cast<size_t>(from.at(j) -'a'+1)}; i  < alphabet.size() + (from.at(j) -'a'); ++i){
+        for (size_t i{static_cast<size_t>(from.at(j) -'a')}; i  < alphabet.size() + (from.at(j) -'a'); ++i){
             word.at(j) = alphabet.at(i%alphabet.size());
             all_possible_neighbors.push_back(word);
         }
@@ -64,9 +64,7 @@ vector<string> get_neighbors(const Dictionary &dict, const string &from, const u
     return neighbors;
 }
 
-void add_keys(unordered_map<string, string> &graph, unordered_map<string, bool> & visited, const Dictionary &dict, string const& from){
-    graph.emplace(from, string{} );
-    visited.emplace(from, true);
+void add_keys(unordered_map<string, string> &graph, unordered_map<string, bool> & visited, const Dictionary &dict){
     for (const string& word : dict) {
         graph.emplace(word, string{} );
         visited.emplace(word, false);
@@ -77,7 +75,7 @@ vector<string> bfs(const Dictionary &dict, string const& from, string const& to)
     unordered_map<string, string> graph;
     unordered_map<string, bool> visited;
 
-    add_keys(graph, visited, dict, from);
+    add_keys(graph, visited, dict);
 
     vector<string> chain { };
     queue<string> q;
@@ -106,12 +104,11 @@ vector<string> bfs(const Dictionary &dict, string const& from, string const& to)
     return chain;
 }
 
-
 vector<string> bfs_longest(const Dictionary &dict, string const& from) {
     unordered_map<string, string> graph;
     unordered_map<string, bool> visited;
 
-    add_keys(graph, visited, dict, from);
+    add_keys(graph, visited, dict);
     
     vector<vector<string>> all_paths{ };
     vector<string> chain { };
@@ -135,11 +132,12 @@ vector<string> bfs_longest(const Dictionary &dict, string const& from) {
         }  
         
         if (found_end){
-            if (curr == from){
-                chain = vector<string>{};
-            } else {
+            if (curr != from){
                 chain = follow_parents(graph, curr , from, true);
                 chain.push_back(from);
+            } 
+            else if (graph.count(from) > 0){
+                chain = follow_parents(graph, curr , from, true);
             }
             all_paths.push_back(chain);
         }
